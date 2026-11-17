@@ -18,7 +18,7 @@ dimension			3
 
 boundary 			p p p
 
-read_data			Bondiung_Test_V3.22.data
+read_data			Bonding_Test_V3.22.data
 
 group				Center type 1
 

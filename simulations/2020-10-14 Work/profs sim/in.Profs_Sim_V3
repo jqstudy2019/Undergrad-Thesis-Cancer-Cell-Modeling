@@ -43,7 +43,7 @@ timestep			0.00001
 
 thermo				1000
 
-dump 				1 all atom 500 dump.worky_v2
+dump 				1 all atom 500 dump.working_v2
 
 fix 				1 all nve
 

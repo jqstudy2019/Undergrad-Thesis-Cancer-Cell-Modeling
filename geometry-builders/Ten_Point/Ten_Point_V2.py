@@ -70,7 +70,8 @@ def find_neighbors(orig_atom_id):
 ##--------------------------------------------------------------------------------------------------------------------##
 #   Output File Options   #
 
-filename = input("Enter a name for the Output File (remember .data at the end!) :")  # String Name of File to be Created
+import sys  # output name may be given on the command line
+filename = sys.argv[1] if len(sys.argv) > 1 else input("Enter a name for the Output File (remember .data at the end!) :")  # String Name of File to be Created
 
 ##--------------------------------------------------------------------------------------------------------------------##
 #   Sim Box Settings    #

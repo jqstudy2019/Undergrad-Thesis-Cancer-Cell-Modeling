@@ -3,6 +3,14 @@
 **Undergraduate Senior Thesis** · John Quinn · University of Wisconsin–Milwaukee, Biomedical Engineering
 Mentor: Dr. Mahsa Dabagh
 
+<p align="center">
+  <img src="simulations/2020-12-15%20Work/fluidcopy/outards.png" width="49%" alt="Coarse-grained cell model: outer membrane surface in a periodic simulation box">
+  <img src="simulations/2020-12-15%20Work/fluidcopy/innards.png" width="49%" alt="Same cell model with the outer surface hidden, showing the internal bonded network">
+</p>
+<p align="center"><em>Coarse-grained cell model from the December 2020 fluid-like membrane runs:
+outer membrane (left) and the bonded internal network beneath it (right).
+Files: <code>simulations/2020-12-15 Work/fluidcopy</code>.</em></p>
+
 This repository collects the simulation inputs, Python geometry builders and
 documents behind my undergraduate research (2020) on modeling cancer cells,
 red blood cells and lipid membranes with the molecular dynamics package
@@ -24,9 +32,9 @@ Research Fellowship (SURF) and grew into my senior thesis, then into my MS thesi
 | [`templates/`](templates) | Reusable membrane input template |
 | [`third-party/`](third-party) | Code by other researchers that this work builds on, kept with credit (see below) |
 
-Folder names are the original working names, so some include version labels
-such as `V1`–`V9`, `worky` / `no worky`, or `_alt2` (a different file that had
-the same name in another backup).
+Folder names follow the original work sessions. Version labels (`V1`–`V9`)
+record each iteration, `working` / `failed` mark which attempts ran, and an
+`_alt2` suffix marks a different file that had the same name in another backup.
 
 ## Running an example
 
@@ -43,14 +51,14 @@ Example: the bonded-membrane test from July 2020.
 
 ```bash
 cd "simulations/2020-07-27 Work/Bonding Test/V4"
-python "../../../../geometry-builders/Bonding_Test/V4/Bondiung_Test_V4.py"
-#   when prompted for the output name, enter: Bondiung_Test_V4.1.data
+python "../../../../geometry-builders/Bonding_Test/V4/Bonding_Test_V4.py" Bonding_Test_V4.1.data
 #   (or copy the ready-made file from geometry-builders/Bonding_Test/V4)
 lmp -in in.Bonding_Test_IN_V1
 ```
 
-The builders ask for an output file name; each input script's `read_data`
-line names the file it expects.
+Each builder takes the output file name as its first argument (it prompts for
+one if none is given), and each input script's `read_data` line names the file
+it expects.
 
 Large outputs (trajectory dumps, rendered videos, and data files over 500 KB)
 are not included; the builders regenerate the data files.

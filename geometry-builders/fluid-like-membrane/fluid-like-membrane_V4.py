@@ -63,7 +63,8 @@ def sphere2cart(rho, theta, phi):
 ##--------------------------------------------------------------------------------------------------------------------##
 #   Output File Options   #
 
-Filename = input("Enter a name for the Output File (remember .data is now included at the end automatically) :")
+import sys  # output name may be given on the command line
+Filename = sys.argv[1] if len(sys.argv) > 1 else input("Enter a name for the Output File (remember .data is now included at the end automatically) :")
 # String Name of File to be Created
 
 Filename = Filename + ".data"  # adds .data file extension
