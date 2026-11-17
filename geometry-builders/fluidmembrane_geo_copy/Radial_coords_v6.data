@@ -1,0 +1,13 @@
+Radial_coords_v6.data
+
+2 atoms
+3 atom types
+0.0 100 xlo xhi
+0.0 100 ylo yhi
+0.0 100 zlo zhi
+
+Atoms
+
+1 1 1 0 0 10 
+2 2 2 0 0 50 
+

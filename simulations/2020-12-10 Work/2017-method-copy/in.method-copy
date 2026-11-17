@@ -1,0 +1,64 @@
+# LAMMPS input file for RBC simulation, written by Hongyan Yuan & Ralph Kfoury, 2015
+
+
+variable     datafile  string  rbc_D50AA9m12_N21702_W_water_d0_water # Sets the variable name of the read data file used, change this name if the read data file name is changed
+variable     P_damp  equal  1                                                # Sets the Pressure damping variable used in the following " fix npt" commands
+variable     P  equal  0.05                                                  # Sets the desired pressure of the system used in the following " fix npt" commands
+variable     scale1 equal ramp(2.7,2.52)                                      # Sets the scale performed in the final fix on water scaling down sigma from 2.7- 2.5
+variable     ew  equal 0.2                                                   # Sets the energy well ( epsilon) variable used in the pair coefficient specifications
+variable     ini_T  equal  0.02		                                     # Sets the initial temperature used in the fix commands below
+variable     T  equal  0.23                                                  # Sets the final temperature used in the fix commands below
+variable     LD equal  1.0                                                   # Sets the temperature damping parameter used in fix commands below
+variable     fid    string   ${datafile}                                                                                          
+variable     logfid  string  log.${fid}
+variable     beta  equal 0.0194*0.0
+      
+
+units	     micro   
+                                                          # Sets the units used for the simulation, in this case: Lennard-Jones units                                                                                             
+atom_style   molecular
+
+bond_style   harmonic                                     # Sets the bond style as harmonic spring defined by Hooke's law
+
+boundary     p p p                                                           # Creates the periodic boundaries of the simulation box
+
+read_data    fluid-like-membrane_V2.data                                         # Specifies which read data file will be used to read in initial coordinates of system
+
+bond_coeff   1   50   1.5                                                 # Defines the bond coefficients and spring constant for the spectrin network bonds 
+
+mass         *          1.0                                                 
+
+
+group        bilayer  type 1 2                                               # Creates a group called bilayer which consists of type 1 and 2 particles, 
+									     #(Type 1 Bilayer, Type 2 Transmembrane proteins)
+
+
+velocity     bilayer create ${T} 87287 loop geom                             # Creates Initial Velocity for bilayer particles ( Type 1 and 2)
+
+          
+
+pair_style lj/cut 3.6 								                         # Sets the pair_style potentials used for the simulation, #in the case both lennard-jones/cut and the fluidmembrane potential
+pair_coeff   *  * ${ew} 1.0        # Sets the pair coefficients and parameters between type 1 and 2 (bilayer) particles
+
+neighbor    1.0 bin                                                          
+
+thermo_style custom step temp press ebond                                         # Printing thermodynamic data to the screen and log file 
+thermo	     200                                                             # Sets the number of timesteps to run before printing out thermodynamic data 
+
+timestep     0.005                                                            # Sets the timestep of the simulation
+
+dump	     1 all atom 50  dump.method-copy                          # Command sets when to dump a snapshot of atom quantities to one or 
+                              						     # more files every N timesteps in one of several styles.
+
+### equilibrium
+
+
+
+fix 1 all nvt temp ${T} ${T} ${LD}      # Applies an NVT (not NPT) ensemble fix to the network group using only temperature parameters               
+
+run 10000
+
+
+
+
+

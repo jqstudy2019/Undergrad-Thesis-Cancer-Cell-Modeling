@@ -1,0 +1,83 @@
+##############################################################################################################################
+# in.smashV2 - This is an input file for a doing scince the easy way, smashing things toghether and seeing what happens
+#
+# By: John Quinn
+#
+# Date: 7/1/2020
+#
+# Summary of Code: (General Steps of code)
+#
+#
+# Apendix of Commands:
+#	(Command -> commands function ; format( Command arg1 arg 2 . . .) ; more notes)
+#		
+# Changes from in.smashV1
+#			Membranes Collide
+#
+###############################################################################################################################
+
+units				lj
+
+atom_style			molecular
+
+dimension			3
+
+boundary 			p p p
+
+read_data			smashV3.data 
+
+mass				1 1.0
+
+group				1 id 1:930
+group				2 id 931:1860
+
+pair_style			soft 1.12
+
+pair_coeff			1 1 0.0 
+
+variable        	prefactor equal ramp(0,60)
+
+fix             	soft all adapt 1 pair soft a * * v_prefactor
+
+neighbor			0.3 bin
+
+neigh_modify		delay 0 every 1 check yes
+
+fix					1 all rigid molecule
+
+dump				1 all atom 10 dump.smashV1.equil
+
+thermo				100
+
+velocity			Bullet set 0 0 -1
+velocity			Center set 0 0 10
+
+run					1000
+
+undump				1
+
+unfix           	soft
+
+unfix				1
+
+pair_style			lj/cut 2.5
+
+pair_coeff			1 1 1.0 1.0
+
+reset_timestep		0
+
+neighbor			0.3 bin
+
+neigh_modify		delay 0 every 1 check yes
+
+pair_style			lj/cut 2.5
+
+pair_coeff			1 1 1.0 1.0
+
+timestep			0.001
+
+thermo				1000
+
+dump 				1 all atom 50 dump.smashV1
+
+run					10000

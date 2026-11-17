@@ -1,0 +1,24 @@
+Ten_Point_V1.8.data
+
+10 atoms
+1 atom types
+1 bond types
+1 angle types
+1 dihedral types
+0.0 100 xlo xhi
+0.0 100 ylo yhi
+0.0 100 zlo zhi
+
+Atoms
+
+1 1 1 31 46 49 
+2 1 1 31 46 50 
+3 1 1 31 46 51 
+4 1 1 31 47 47 
+5 1 1 31 47 48 
+6 1 1 31 47 49 
+7 1 1 31 47 50 
+8 1 1 31 47 51 
+9 1 1 31 47 52 
+10 1 1 31 47 53 
+

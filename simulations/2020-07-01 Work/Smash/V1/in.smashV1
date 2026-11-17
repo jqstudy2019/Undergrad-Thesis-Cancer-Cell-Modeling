@@ -1,0 +1,103 @@
+##############################################################################################################################
+# in.smashV1 - This is an input file for a doing scince the easy way, smashing things toghether and seeing what happens
+#
+# By: John Quinn
+#
+# Date: 7/1/2020
+#
+# Summary of Code: (General Steps of code)
+#
+#
+# Apendix of Commands:
+#	(Command -> commands function ; format( Command arg1 arg 2 . . .) ; more notes)
+#		
+# Changes from in.withoutwater
+#		More Membranes
+#		More Inital Velocity 
+#	
+#
+###############################################################################################################################
+
+units				lj
+
+atom_style			sphere
+
+atom_modify			map array first big
+
+dimension			3
+
+fix             	molprop all property/atom mol
+
+read_data			smashV1.data fix molprop NULL Molecules
+
+set					type 1 mass 1.0
+
+group				big type 1
+
+velocity			big create 14.4 87287 loop geom
+
+pair_style			soft 1.12
+
+pair_coeff			1 1 0.0 
+
+variable        	prefactor equal ramp(0,60)
+
+fix             	soft all adapt 1 pair soft a * * v_prefactor
+
+neighbor			0.3 bin
+
+neigh_modify		delay 0 every 1 check yes
+
+fix					1 big rigid molecule
+
+dump				1 all atom 10 dump.smashV1.equil
+
+compute				tbig all temp/sphere
+
+thermo_modify		temp tbig
+
+thermo				100
+
+run					1000
+
+undump				1
+
+unfix           	soft
+
+unfix				1
+
+pair_style			lj/cut 2.5
+
+pair_coeff			1 1 1.0 1.0
+
+reset_timestep		0
+
+neighbor			0.3 bin
+
+neigh_modify		delay 0 every 1 check yes
+
+#comm_modify			mode multi group big vel yesneigh_modify		include big
+
+pair_style			lj/cut 2.5
+
+pair_coeff			1 1 1.0 1.0
+
+timestep			0.001
+
+fix					1 big rigid molecule
+
+uncompute       	tbig
+
+compute				tbig big temp/sphere
+
+variable			pebig equal pe*atoms/count(big)
+
+variable			ebig equal etotal*atoms/count(big)
+
+thermo_modify		temp tbig
+
+thermo				1000
+
+dump 				1 all atom 50 dump.smashV1
+
+run					1000000

@@ -1,0 +1,375 @@
+########################################################################################################################
+# Create a initial configuration for lammps simulations of a red blood cell immersed in water
+# Written by Szu - PeiFu, Hong yan Yuan & Ralph Kfoury
+########################################################################################################################
+# MODIFIED BY JOHN QUINN 8/31/2020
+#   Translated to Python from Matlab Code
+#
+########################################################################################################################
+# Import Needed Packages / Modules
+
+import numpy as np  # Numpy is used for Array Creation and Manipulation Mainly
+
+
+########################################################################################################################
+# Define User Defined Functions
+
+def points_on_sphere(d, d0):
+
+    temp_x_points = []
+    temp_y_points = []
+    temp_z_points = []
+
+    rr1 = d / 2
+
+
+    nn = 1
+
+    temp_x_points[nn] = d0
+    temp_y_points[nn] = d0
+    temp_z_points[nn] = r1
+
+
+    nn = 2
+
+    temp_x_points[nn] = d0
+    temp_y_points[nn] = d0
+    temp_z_points[nn] = -rr1
+
+    for ii in range(2, round(np.pi / 2.0 / np.arcsin(d0 / 2.0 / rr1))):
+        ti = (ii - 1) * np.pi / round(np.pi / 2.0 / np.arcsin(d0 / 2.0 / rr1))
+        for jj in range(1, round(np.pi * np.sin(ti) / np.arcsin(d0 / 2.0 / rr1))):
+
+            nn = nn + 1
+            fj = (jj - 1) * 2.0 * np.pi / round(np.pi * np.sin(ti) / np.arcsin(d0 / 2.0 / rr1))
+            temp_x_points[nn] = rr1 * np.sin(ti) * np.cos(fj)
+            temp_y_points[nn] = rr1 * np.sin(ti) * np.sin(fj)
+            temp_z_points[nn] = rr1 * np.cos(ti)
+
+    natoms = temp_x_points.shape
+
+    xyz = [temp_x_points, temp_y_points, temp_z_points]
+
+    xyz = xyz + np.rand((xyz.shape[0], xyz.shape[1]) , 3) / 100
+
+    return natoms, xyz
+
+
+########################################################################################################################
+##### $$$$$$  function create_rbc_with_water
+### Define Initial Variables
+
+d0_water = 2.7 # distance between water particles in the initial configuration
+
+d0_vesicle = 0.97 # particle distance
+
+D_vesicle = 50 # distance between the bilayer membrane particles
+
+R_vesicle = D_vesicle / 2 # Diameter of the vesicle in initial configuration
+
+gap = 2
+
+D_network = D_vesicle - gap * 2
+
+b = 10
+
+n_bead = 11
+
+d0_network = 9
+
+shape = [1, 1, 1]
+
+volume_vesicle = 4 / 3 * np.pi() * 0.5 ^ 3 * shape[1] * shape[2] * shape[3]
+volume_network = 4 / 3 * np.pi * 0.5 ^ 3
+volume_water = 4 / 3 * np.pi * (d0_water / 2) ^ 3
+
+
+########################################################################################################################
+#  Creates the Initial Configuration of RBC membrane with spectrin network
+
+[natoms_vesicle, xyz_vesicle] = points_on_sphere(D_vesicle, d0_vesicle)
+
+[natoms_anchor, xyz_network] = points_on_sphere(D_network, d0_network)
+
+tri = convhulln(xyz_network)
+[bond, ~] = find_bond(tri, xyz_network)
+
+n_tri = size(tri, 1)
+n_bond = n_tri * 3 / 2
+
+new_n_bond = n_bond * (n_bead + 1) + natoms_anchor + n_bond
+new_bond = zeros(new_n_bond, 2)
+
+for i=1:n_bond
+atom_i = bond(i, 1)
+atom_j = bond(i, 2)
+r_i = xyz_network(atom_i,:);
+r_j = xyz_network(atom_j,:);
+
+j = 1;
+new_atom_id = natoms_anchor + j + (i - 1) * n_bead;
+new_bond_id = j + (i - 1) * (n_bead + 1);
+new_bond(new_bond_id, 1: 2) = [atom_i, new_atom_id];
+xyz_network(new_atom_id, 1: 3) = r_i + j * (r_j - r_i) / (n_bead + 1);
+
+for j=2:n_bead
+new_atom_id = natoms_anchor + j + (i - 1) * n_bead;
+new_bond_id = j + (i - 1) * (n_bead + 1);
+new_bond(new_bond_id, 1: 2) = [new_atom_id - 1, new_atom_id];
+xyz_network(new_atom_id, 1: 3) = r_i + j * (r_j - r_i) / (n_bead + 1);
+end
+
+new_bond_id = new_bond_id + 1;
+new_bond(new_bond_id, 1: 2) = [new_atom_id, atom_j];
+end
+
+vesicle_atom_type = ones(1, natoms_vesicle);
+
+for i=1:natoms_anchor
+r = xyz_vesicle - ones(natoms_vesicle, 1) * xyz_network(i,:);
+r = sum(r. * r, 2);
+[~, ind] = sort(r);
+
+new_bond(n_bond * (n_bead + 1) + i,:) = [ind(1), i + natoms_vesicle];
+
+vesicle_atom_type(ind(1)) = 2;
+end
+
+for i=natoms_anchor+1:natoms_anchor + n_bond
+k = (i - natoms_anchor - 1) * n_bead + (n_bead + 1) / 2;
+r = xyz_vesicle - ones(natoms_vesicle, 1) * xyz_network(natoms_anchor + k,:);
+r = sum(r. * r, 2);
+[~, ind] = sort(r);
+
+new_bond(n_bond * (n_bead + 1) + i,:) = [ind(1), natoms_anchor + k + natoms_vesicle];
+
+vesicle_atom_type(ind(1)) = 2;
+end
+
+natoms_network = natoms_anchor + n_bond * n_bead;
+
+n_point = natoms_vesicle + natoms_network;
+
+density_vesicle = 1 / (4 / 3 * pi * shape(1) * shape(2) * shape(3));
+density_network = 1 / (4 / 3 * pi);
+density_water = 1 / (4 / 3 * pi);
+########################################################################################################################
+# creates a water box surrounding the RBC membrane and inside the RBC
+
+x = -R_vesicle - b + d0_water: d0_water: R_vesicle + b - d0_water;
+nx = size(x, 2);
+
+inner_r2 = (R_vesicle - d0_water - gap * 2) * (R_vesicle - d0_water - gap * 2);
+outer_r2 = (R_vesicle + d0_water) * (R_vesicle + d0_water);
+water_in = 0;
+water_out = 0;
+for i=1:nx
+for j=1:nx
+for k=1:nx
+r = [x(i), x(j), x(k)];
+r2 = r * r';
+if r2 < inner_r2
+    water_in = water_in + 1;
+xyz_water_in(water_in, 1: 3) = r;
+
+elseif
+r2 > outer_r2
+water_out = water_out + 1;
+xyz_water_out(water_out, 1: 3) = r;
+end
+end
+end
+end
+natoms_water = water_in + water_out;
+n_point_with_water = n_point + natoms_water;
+########################################################################################################################
+# Creates the Read Data File neccessary for a LAMMPS Input File
+
+fid = fopen(['RBC_V2.data'], 'w');
+
+fprintf(fid, 'This File produces a vesicle with diameter = %12f', D_vesicle);
+fprintf(fid, '\n');
+fprintf(fid, '\n');
+fprintf(fid, '%d atoms\n', n_point_with_water);
+fprintf(fid, '%d bonds\n', new_n_bond);
+fprintf(fid, '%d ellipsoids\n', natoms_vesicle);
+fprintf(fid, '\n');
+fprintf(fid, '%d atom types\n', 7);
+fprintf(fid, '%d bond types\n', 3);
+fprintf(fid, '\n');
+fprintf(fid, '%d %d xlo xhi\n', -R_vesicle - b, R_vesicle + b);
+fprintf(fid, '%d %d ylo yhi\n', -R_vesicle - b, R_vesicle + b);
+fprintf(fid, '%d %d zlo zhi\n', -R_vesicle - b, R_vesicle + b);
+fprintf(fid, '\n');
+
+fprintf(fid, '\n');
+fprintf(fid, 'Atoms\n\n');
+########################################################################################################################
+# First writes X, Y, Z coordinates of System to Read Data
+
+for j=1:natoms_vesicle
+
+type = vesicle_atom_type(j);
+ellipsoidflag = 1;
+molecule_ID = 0;
+fprintf(fid, '%d %d  %d %d %d  %d %d %d %d %d \n', ...
+j, type, xyz_vesicle(j,:), ellipsoidflag, density_vesicle, volume_vesicle, ...
+density_vesicle, molecule_ID);
+end
+
+for j=1:natoms_anchor
+type = 2 + 1;
+ellipsoidflag = 0;
+molecule_ID = 1;
+fprintf(fid, '%d %d  %d %d %d %d %d %d %d %d \n', ...
+j + natoms_vesicle, type, xyz_network(j,:), ellipsoidflag, density_network, ...
+volume_network, density_network, molecule_ID);
+end
+
+for j=natoms_anchor+1:natoms_network
+
+type = 3 + 1;
+if mod(j - natoms_anchor, n_bead) == (n_bead + 1) / 2
+    type = 4 + 1;
+end
+
+ellipsoidflag = 0;
+molecule_ID = 2;
+fprintf(fid, '%d %d %d %d %d %d %d %d %d %d \n', ...
+j + natoms_vesicle, type, xyz_network(j,:), ellipsoidflag, density_network, ...
+volume_network, density_network, molecule_ID);
+end
+
+for j=1:water_in
+type = 5 + 1;
+ellipsoidflag = 0;
+molecule_ID = 3;
+fprintf(fid, '%d %d %d %d %d %d %d %d %d %d\n', ...
+j + n_point, type, xyz_water_in(j,:), ellipsoidflag, density_water, ...
+volume_water, density_water, molecule_ID);
+end
+
+for j=1:water_out
+type = 6 + 1;
+ellipsoidflag = 0;
+molecule_ID = 4;
+fprintf(fid, '%d %d %d %d %d %d %d %d %d %d \n', ...
+j + n_point + water_in, type, xyz_water_out(j,:), ellipsoidflag, ...
+density_water, volume_water, density_water, molecule_ID);
+end
+
+fprintf(fid, '\n');
+
+fprintf(fid, 'Ellipsoids\n\n');
+
+nx = [1 0 0];
+for j=1:natoms_vesicle
+n = xyz_vesicle(j,:) / norm(xyz_vesicle(j,:));
+nv = cross(nx, n);
+nv = nv / norm(nv);
+theta2 = acos(sum(nx. * n)) / 2;
+
+fprintf(fid, '%d %d %d %d %d %d %d %d\n', j, shape, cos(theta2), nv(1) * sin(theta2), nv(2) * sin(theta2),
+        nv(3) * sin(theta2));
+end
+fprintf(fid, '\n\n');
+########################################################################################################################
+# Outputs the Bond Information between particles in the system to the Read Data File Above
+
+fprintf(fid, 'Bonds\n\n');
+for i=1:n_bond * (n_bead + 1)
+fprintf(fid, '%d %d %d %d\n', i, 1, new_bond(i, 1) + natoms_vesicle, new_bond(i, 2) + natoms_vesicle); % Note
+"+natoms_vesicle"
+end
+
+for i=n_bond * (n_bead+1)+1:n_bond * (n_bead + 1) + natoms_anchor
+fprintf(fid, '%d %d %d %d \n', i, 2, new_bond(i, 1), new_bond(i, 2));
+end
+
+for i=n_bond * (n_bead+1)+natoms_anchor+1:n_bond * (n_bead + 1) + natoms_anchor + n_bond
+fprintf(fid, '%d %d %d %d \n', i, 3, new_bond(i, 1), new_bond(i, 2));
+end
+
+fclose(fid);
+########################################################################################################################
+# A function to be used to create a initial configuration for lammps simulations of a red blood cell
+# Written by Hongyan Yuan, 2011
+
+function[bond, bond_length]=find_bond(tri, xyz)
+
+n_tri = size(tri, 1);
+n_bond = n_tri * 3 / 2;
+
+t=1;
+i=tri(t, 1);
+j=tri(t, 2);
+k=tri(t, 3);
+
+bn=1;
+bond(bn,:)=[i j];
+
+bn = bn + 1;
+bond(bn,:)=[j k];
+
+bn = bn + 1;
+bond(bn,:)=[k i];
+
+for t = 2:n_tri
+i = tri(t, 1);
+j = tri(t, 2);
+k = tri(t, 3);
+
+overlap = 0;
+for a = 1:bn
+if (i == bond(a, 1) & & j == bond(a, 2)) | | (j == bond(a, 1) & & i == bond(a, 2))
+overlap = 1;
+end
+end
+
+if overlap == 0
+bn = bn + 1;
+bond(bn,:)=[i j];
+end
+
+overlap = 0;
+for a = 1:bn
+if (j == bond(a, 1) & & k == bond(a, 2)) | | (k == bond(a, 1) & & j == bond(a, 2))
+overlap = 1;
+end
+end
+
+if overlap == 0
+bn = bn + 1;
+bond(bn,:)=[j k];
+end
+
+overlap = 0;
+for a = 1:bn
+if (i == bond(a, 1) & & k == bond(a, 2)) | | (k == bond(a, 1) & & i == bond(a, 2))
+overlap = 1;
+end
+end
+
+if overlap == 0
+bn = bn + 1;
+bond(bn,:)=[i k];
+end
+end
+
+if n_bond == bn
+
+else
+
+output = 'something wrong!'
+end
+
+bond_length = zeros(n_bond, 1);
+for i = 1:n_bond
+r1 = xyz(bond(i, 1),:);
+r2 = xyz(bond(i, 2),:);
+
+bond_length(i) = norm(r1 - r2);
+end
+
+end
+########################################################################################################################

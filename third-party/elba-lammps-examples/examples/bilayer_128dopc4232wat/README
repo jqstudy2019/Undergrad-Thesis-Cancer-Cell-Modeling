@@ -1,0 +1,47 @@
+Simulation of preassembled lipid bilayer.
+
+Various profiles are evaluated and averaged 'on the fly' - see
+'profiles/*.zProfile'. These files can be further processed (using
+the scripts in 'tools/') to obtain the *.dat curves.
+
+The folder 'diffusion/' contains MSD data calculated on the fly by
+LAMMPS and corresponding diffusion curves obtained with the 
+'msd2diff.py' tool.
+
+The folder 'area_volume/' contains xy-area and box volume data
+averaged over time windows as defined in the input script. These
+data can also be used to calculate compressibility moduli - see the
+'calcAreaComp.py' and 'calcVolComp.py' tools in the 'tools/' dir.
+
+References:
+- Ding W, Palaiokostas M, Orsi M. Stress testing the ELBA water model, 
+Molecular Simulation, DOI: 10.1080/08927022.2015.1047367
+- Orsi, Mol. Phys. 112: 1566 (2014)
+- Orsi & Essex, Faraday Discuss. 161, 249 (2013)
+- Orsi & Essex, PLoS ONE 6, e28637 (2011)
+- Orsi et al, J. Phys.: Condens. Matter. 22, 155106 (2010)
+
+Example of post-processing:
+
+- python calcVolComp.py xyArea.dat temp | tee KV
+- python calcAreaComp.py xyArea.dat temp | tee KA
+
+- python stress2press.py stress.zProfile xyArea Pz > pi-tot.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-tot.dat
+
+- python stress2press.py stressKinEn.zProfile xyArea Pz > pi-ke.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-ke.dat
+
+- python stress2press.py stressNonBond.zProfile xyArea Pz > pi-nb.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-nb.dat 
+
+- python stress2press.py stressVir.zProfile xyArea Pz > pi-vir.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-vir.dat
+
+- python stress2press.py stressBond.zProfile xyArea Pz > pi-b.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-b.dat
+
+- python stress2press.py stressAngle.zProfile xyArea Pz > pi-a.dat
+- mv zP_xx_yy_zz_xy_xz_yz.dat zP_xx_yy_zz_xy_xz_yz-a.dat
+
+For example, xyArea=4676.82 and Pz=1.0. 

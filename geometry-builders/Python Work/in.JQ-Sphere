@@ -1,0 +1,52 @@
+###############################################################################################################################
+# in.JQ-Sphere - This is an input file for my (not) sphere sim 
+#
+# By: John Quinn
+#
+# Date: 5/6/2020
+#
+# Summary of Code: (General Steps of code)
+#
+#
+# Apendix of Commands:
+#	(Command -> commands function ; format( Command arg1 arg 2 . . .) ; more notes)
+#		
+# Refrences:
+#	
+#
+###############################################################################################################################
+units		lj
+atom_style	sphere
+dimension	3
+
+read_data JQ-spherev2.data
+
+set		group all type/fraction 2 0.96 23984
+
+set		type 1 mass 9
+
+velocity	all create 1.44 87287 loop geom
+
+# multi neighbor and comm for efficiency
+
+neighbor	1 multi
+neigh_modify	delay 0
+comm_modify     mode multi
+
+# colloid potential
+
+pair_style	colloid 12.5
+pair_coeff	1 1  1.0 1.0 5.0 5.0 12.5
+
+
+fix		1 all npt temp 2.0 2.0 1.0 iso 0.0 1.0 10.0 drag 1.0 &
+	        mtk no pchain 0 tchain 1
+
+dump 1 all atom 50 dump.JQ-Sphere
+
+thermo_style	custom step temp epair etotal press vol
+thermo		1000
+
+timestep	0.005
+
+run		50000

@@ -1,0 +1,78 @@
+##############################################################################################################################
+# in.Potential_Test_TEMPLATE
+#
+# By: John Quinn
+#
+# Date: 9/21/2020
+#
+###############################################################################################################################
+
+units				lj
+
+atom_style			molecular
+
+dimension			3
+
+boundary 			p p p
+
+read_data			Membrane_W_Water.data
+
+group				bilayer type 1
+group				water type 2
+
+neighbor			1.0 bin
+neigh_modify		delay 0 every 1 check yes
+
+comm_modify cutoff 6.5
+
+mass				* 1.0
+
+angle_style harmonic
+angle_coeff * 300 100
+
+dihedral_style harmonic
+dihedral_coeff 1 80.0 1 2
+
+bond_style			harmonic 
+bond_coeff			1 50 1.2
+bond_coeff			2 50 2.4
+
+pair_style 			lj/cut 2.5
+
+pair_coeff 			1 1 1 1
+
+pair_coeff 			1 2 .1 1
+
+pair_coeff 			1 3 .1 1
+
+pair_coeff 			2 3 1 1
+
+pair_coeff 			2 2 1 1
+
+pair_coeff 			3 3 1 1
+
+
+timestep			0.00001
+
+thermo				1000
+
+dump 				1 all atom 500 dump.jq_test_wdihedral
+
+fix 				1 all nve
+
+variable ini_T equal 0.02
+variable T equal 0.23
+variable P equal 0.05
+variable LD equal 1.0
+variable P_damp equal 1
+
+fix 2 water npt temp 300.0 300.0 100.0 iso 0.0 0.0 1000.0
+
+fix 3 bilayer nvt temp ${T} ${T} ${LD}
+
+
+
+fix 4 bilayer bond/create 10 1 2 0.8 1 atype 1 dtype 1 iparam 2 1 jparam 2 2
+
+
+run					1000000
