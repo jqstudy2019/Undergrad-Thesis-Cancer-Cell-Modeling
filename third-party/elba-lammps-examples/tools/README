@@ -1,8 +1,0 @@
-This directory contains scripts that can be used to post-process LAMMPS 
-output files (to extract properties of interest, convert formats, etc.). 
-See guidelines at the top of each script for usage information.
-
-Most of the tools as quite general, so they can be used on data 
-not necessarily generated with LAMMPS (though adjustments may be needed).
-
-Mario Orsi

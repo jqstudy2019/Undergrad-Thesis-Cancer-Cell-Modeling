@@ -71,11 +71,11 @@ are not included; the builders regenerate the data files.
   Physics Communications* 210, 193–203 (2017),
   [doi:10.1016/j.cpc.2016.09.018](https://doi.org/10.1016/j.cpc.2016.09.018). `simulations/Modified Fu Files`
   holds my modified inputs built on it.
-- **ELBA force field** (`third-party/elba-lammps-examples`): Orsi, M. & Essex,
-  J. W., "The ELBA force field for coarse-grain modeling of lipid membranes,"
-  *PLoS ONE* 6(12), e28637 (2011),
-  [doi:10.1371/journal.pone.0028637](https://doi.org/10.1371/journal.pone.0028637). The example runs are from the ELBA-LAMMPS
-  distribution.
+- **ELBA force field:** Orsi, M. & Essex, J. W., "The ELBA force field for
+  coarse-grain modeling of lipid membranes," *PLoS ONE* 6(12), e28637 (2011),
+  [doi:10.1371/journal.pone.0028637](https://doi.org/10.1371/journal.pone.0028637).
+  My ELBA water-model runs are in `simulations/2020-11-18 Work/ELBA`; the
+  ELBA-LAMMPS example files they started from are not redistributed here.
 - **LAMMPS–Palabos coupling / validation method:** Tan, J., Sinno, T. R. & Diamond, S. L.,
   "A parallel fluid–solid coupling model using LAMMPS and Palabos based on the
   immersed boundary method," *Journal of Computational Science* 25, 89–100 (2018),
